@@ -26,7 +26,7 @@ public final class AishiteruManager {
         boolean rightShiftDown = Keyboard.isCreated() && Keyboard.isKeyDown(Keyboard.KEY_RSHIFT);
 
         if (rightShiftDown && !rightShiftWasDown && client.player != null && client.currentScreen == null) {
-            trigger();
+            trigger(client);
         }
 
         rightShiftWasDown = rightShiftDown;
@@ -71,9 +71,9 @@ public final class AishiteruManager {
         GlStateManager.popMatrix();
     }
 
-    private static void trigger() {
+    private static void trigger(MinecraftClient client) {
         ticksSinceTrigger = 0;
         answerSent = false;
-        AishiteruSoundPlayer.play();
+        AishiteruSoundPlayer.play(client);
     }
 }
