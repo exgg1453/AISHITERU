@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 1,
+  "id": "aishiteru",
+  "version": "${version}",
+  "name": "AISHITERU",
+  "description": "Press Right Shift to ask the question.",
+  "authors": [
+    "W"
+  ],
+  "license": "MIT",
+  "environment": "client",
+  "mixins": [
+    "aishiteru.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=0.16.0",
+    "minecraft": "1.12.2"
+  }
+}

@@ -1,0 +1,68 @@
+name: Build
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup JDK
+        uses: actions/setup-java@v4
+        with:
+          java-version: "21"
+          distribution: "temurin"
+
+      - name: Resolve Legacy Fabric versions
+        id: versions
+        shell: bash
+        run: |
+          DEFAULT_YARN_BUILD=$(grep '^yarn_build=' gradle.properties | cut -d= -f2)
+          DEFAULT_LOADER_VERSION=$(grep '^loader_version=' gradle.properties | cut -d= -f2)
+          YARN_BUILD=$(curl -fsSL https://meta.legacyfabric.net/v2/versions/yarn/1.12.2 | jq -r '.[0].build' 2>/dev/null || true)
+          LOADER_VERSION=$(curl -fsSL https://meta.legacyfabric.net/v2/versions/loader | jq -r '[.[] | select(.stable == true)][0].version' 2>/dev/null || true)
+          if [ -z "$YARN_BUILD" ] || [ "$YARN_BUILD" = "null" ]; then YARN_BUILD=$DEFAULT_YARN_BUILD; fi
+          if [ -z "$LOADER_VERSION" ] || [ "$LOADER_VERSION" = "null" ]; then LOADER_VERSION=$DEFAULT_LOADER_VERSION; fi
+          echo "yarn_build=$YARN_BUILD" >> "$GITHUB_OUTPUT"
+          echo "loader_version=$LOADER_VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Build
+        shell: bash
+        run: |
+          chmod +x ./gradlew
+          set -o pipefail
+          ./gradlew build --stacktrace -Pyarn_build=${{ steps.versions.outputs.yarn_build }} -Ploader_version=${{ steps.versions.outputs.loader_version }} 2>&1 | tee build.log
+
+      - name: Create error file
+        if: failure()
+        shell: bash
+        run: |
+          {
+            echo "yarn_build=${{ steps.versions.outputs.yarn_build }}"
+            echo "loader_version=${{ steps.versions.outputs.loader_version }}"
+            echo
+            grep -n -E "error:|What went wrong|FAILURE|Exception" build.log || true
+            echo
+            tail -n 300 build.log || true
+          } > error.txt
+
+      - name: Upload error file
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: error
+          path: error.txt
+
+      - name: Upload mod jar
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: AISHITERU
+          path: |
+            build/libs/*.jar
+            !build/libs/*-sources.jar
