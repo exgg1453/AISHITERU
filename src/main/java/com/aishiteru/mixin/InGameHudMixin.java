@@ -12,6 +12,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public abstract class InGameHudMixin {
     @Inject(method = "render(F)V", at = @At("TAIL"))
     private void aishiteru$onRender(float tickDelta, CallbackInfo callbackInfo) {
-        AishiteruManager.onHudRender(MinecraftClient.getInstance());
+        AishiteruManager.onHudRender(MinecraftClient.getInstance(), tickDelta);
     }
 }
