@@ -19,6 +19,8 @@ public final class AishiteruJumpscare {
     private static final float START_SCALE = 0.7F;
     private static final float END_SCALE = 1.35F;
     private static final float SHAKE_INTENSITY = 6.0F;
+    private static final float FOCUS_POINT_X = 0.5F;
+    private static final float FOCUS_POINT_Y = 0.33F;
     private static final int BACKGROUND_COLOR = 0xFF000000;
     private static final Random RANDOM = new Random();
 
@@ -44,8 +46,8 @@ public final class AishiteruJumpscare {
         float drawHeight = textureHeight * coverScale;
         float shakeOffsetX = (RANDOM.nextFloat() - 0.5F) * 2.0F * SHAKE_INTENSITY;
         float shakeOffsetY = (RANDOM.nextFloat() - 0.5F) * 2.0F * SHAKE_INTENSITY;
-        float drawX = (scaledWidth - drawWidth) / 2.0F + shakeOffsetX;
-        float drawY = (scaledHeight - drawHeight) / 2.0F + shakeOffsetY;
+        float drawX = scaledWidth / 2.0F - drawWidth * FOCUS_POINT_X + shakeOffsetX;
+        float drawY = scaledHeight / 2.0F - drawHeight * FOCUS_POINT_Y + shakeOffsetY;
 
         DrawableHelper.fill(0, 0, (int) Math.ceil(scaledWidth), (int) Math.ceil(scaledHeight), BACKGROUND_COLOR);
 
